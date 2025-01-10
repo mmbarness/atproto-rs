@@ -3,25 +3,27 @@
 A rust crate to connect to a bluesky PDS and utilise the Authenticated Transfer protocol
 
 ## Currently implemented
+
 - com.atproto
-    - server
+  - server
         - createInviteCode (ATP.create_invite_code)
-        - createAccount (ATP.create_account)
-        - createSession (ATP.login)
+    - createAccount (ATP.create_account)
+      - createSession (ATP.login)
         - refreshSession (ATP.refresh)
     - repo
-        - createRecord (ATP.post)
+      - createRecord (ATP.post)
     - identity
-        - resolveHandle (ATP.resolveHandle)
+      - resolveHandle (ATP.resolveHandle)
 
 `Note: ATP.post is specifically for a bluesky post. Replies and reposts are not currently supported but planned.`
 
 ## Example Code
+
 A quick example GUI powered by the crate
 
 Run with:
 
-```
+```rust
 cargo run --bin atproto-rs-example
 ```
 

@@ -1,15 +1,15 @@
 use super::record::Record;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PostRes {
     pub uri: String,
-    pub cid: String
+    pub cid: String,
 }
 
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Post {
     pub repo: String,
-    pub collection:String,
-    pub record: Record
+    pub collection: String,
+    pub record: Record,
 }

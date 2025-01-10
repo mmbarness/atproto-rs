@@ -1,26 +1,26 @@
 mod request_body;
 
-use request_body::{
-    record::Record,
-    post::{Post, PostRes},
-    login::{Login,LoginRes},
-    invite::{InviteCode,InviteCodeRes},
-    account_create::{CreateAccount,CreateAccountRes},
-    refresh_session::RefreshSessionRes,
-    resolve::{ResolveHandle,ResolveHandleRes},
-    app_password::{AppSpecificPassword,AppSpecificPasswordRes}
-};
-use reqwest;
 use chrono::prelude::*;
 use derive_getters::Getters;
+use request_body::{
+    account_create::{CreateAccount, CreateAccountRes},
+    app_password::{AppSpecificPassword, AppSpecificPasswordRes},
+    invite::{InviteCode, InviteCodeRes},
+    login::{Login, LoginRes},
+    post::{Post, PostRes},
+    record::Record,
+    refresh_session::RefreshSessionRes,
+    resolve::{ResolveHandle, ResolveHandleRes},
+};
+use reqwest;
 
 #[derive(Getters)]
-pub struct ATP{
+pub struct ATP {
     base_url: String,
     pub identifier: String,
     did: String,
     jwt: String,
-    refresh_jwt: String
+    refresh_jwt: String,
 }
 
 impl Default for ATP {
@@ -30,26 +30,29 @@ impl Default for ATP {
             identifier: String::from(""),
             did: String::from(""),
             jwt: String::from(""),
-            refresh_jwt: String::from("")
+            refresh_jwt: String::from(""),
         }
     }
 }
 
 impl ATP {
-    pub fn new(base_url:&String) -> ATP {
+    pub fn new(base_url: &String) -> ATP {
         Self {
             base_url: base_url.to_string(),
             ..Default::default()
         }
     }
-    
-    // com.atproto.server
 
-    pub fn create_invite_code(self, admin_username: String, admin_password: String, use_count: u32) -> reqwest::Result<InviteCodeRes> {
+    pub fn create_invite_code(
+        self,
+        admin_username: String,
+        admin_password: String,
+        use_count: u32,
+    ) -> reqwest::Result<InviteCodeRes> {
         let body = InviteCode {
             useCount: use_count,
         };
-        let url = "".to_string()+&self.base_url+"/xrpc"+"com.atproto.server.createInviteCode";
+        let url = "".to_string() + &self.base_url + "/xrpc" + "com.atproto.server.createInviteCode";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
@@ -57,17 +60,17 @@ impl ATP {
             .json(&body)
             .basic_auth(admin_username, Some(admin_password))
             .send();
-        let res:reqwest::blocking::Response;
+        let res: reqwest::blocking::Response;
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
 
-        let res_json:InviteCodeRes;
+        let res_json: InviteCodeRes;
         match res.json::<InviteCodeRes>() {
             Ok(json) => {
                 res_json = json;
-            },
+            }
             Err(e) => {
                 return Err(e);
             }
@@ -75,24 +78,30 @@ impl ATP {
         Ok(res_json)
     }
 
-    pub fn create_account(mut self, identifier:String, password:String, email:String, invite_code:String) -> reqwest::Result<CreateAccountRes>{
+    pub fn create_account(
+        mut self,
+        identifier: String,
+        password: String,
+        email: String,
+        invite_code: String,
+    ) -> reqwest::Result<CreateAccountRes> {
         let body = CreateAccount {
             handle: identifier,
             email: email,
             password: password,
-            inviteCode: invite_code
+            inviteCode: invite_code,
         };
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.server.createAccount";
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.server.createAccount";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
             .header("Content-Type", "application/json")
             .json(&body)
             .send();
-        let res:reqwest::blocking::Response;
+        let res: reqwest::blocking::Response;
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
 
         let res_json: CreateAccountRes;
@@ -110,12 +119,12 @@ impl ATP {
         Ok(res_json)
     }
 
-    pub fn login(&mut self,identifier: &String, password: String) -> reqwest::Result<LoginRes> {
+    pub fn login(&mut self, identifier: &String, password: String) -> reqwest::Result<LoginRes> {
         let body = Login {
             identifier: identifier.to_owned(),
-            password: password
+            password: password,
         };
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.server.createSession";
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.server.createSession";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
@@ -123,10 +132,10 @@ impl ATP {
             .json(&body)
             .send();
         let res: reqwest::blocking::Response;
-        
+
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
 
         let res_json: LoginRes;
@@ -143,21 +152,20 @@ impl ATP {
         self.refresh_jwt = res_json.refreshJwt.to_owned();
         self.did = res_json.did.to_owned();
         Ok(res_json)
-        
     }
 
-    pub fn refresh(&mut self) -> reqwest::Result<RefreshSessionRes>{
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.server.refreshSession";
+    pub fn refresh(&mut self) -> reqwest::Result<RefreshSessionRes> {
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.server.refreshSession";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
-            .header("Content-Type","application/json")
+            .header("Content-Type", "application/json")
             .bearer_auth(self.jwt())
             .send();
         let res: reqwest::blocking::Response;
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
 
         let res_json: RefreshSessionRes;
@@ -165,21 +173,18 @@ impl ATP {
         match res.json::<RefreshSessionRes>() {
             Ok(json) => {
                 res_json = json;
-            },
+            }
             Err(e) => {
                 return Err(e);
             }
         }
         self.jwt = res_json.accessJwt.to_owned();
         Ok(res_json)
-
     }
-    
-    pub fn create_app_password(&mut self, name: String) -> reqwest::Result<AppSpecificPasswordRes>{
-        let body = AppSpecificPassword {
-            name: name
-        };
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.server.refreshSession";
+
+    pub fn create_app_password(&mut self, name: String) -> reqwest::Result<AppSpecificPasswordRes> {
+        let body = AppSpecificPassword { name: name };
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.server.refreshSession";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
@@ -192,11 +197,11 @@ impl ATP {
 
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
         match res.json::<AppSpecificPasswordRes>() {
             Ok(json) => Ok(json),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 
@@ -210,11 +215,11 @@ impl ATP {
             record: Record {
                 _type: "app.bsky.feed.post".to_string(),
                 text: post_text.to_owned(),
-                createdAt: now
-            }
+                createdAt: now,
+            },
         };
 
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.repo.createRecord";
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.repo.createRecord";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
@@ -226,25 +231,22 @@ impl ATP {
         let res: reqwest::blocking::Response;
         match request {
             Ok(response) => res = response,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
 
         let _res_json: PostRes;
         match res.json::<PostRes>() {
             Ok(json) => Ok(json),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
-        
     }
-    
+
     // com.atproto.identity
 
     pub fn resolvehandle(&self, handle: String) -> reqwest::Result<String> {
-        let body = ResolveHandle {
-            handle: handle
-        };
+        let body = ResolveHandle { handle: handle };
 
-        let url = "".to_string()+&self.base_url+"xrpc/"+"com.atproto.identity.resolveHandle";
+        let url = "".to_string() + &self.base_url + "xrpc/" + "com.atproto.identity.resolveHandle";
 
         let request = reqwest::blocking::Client::new()
             .post(url)
@@ -255,16 +257,12 @@ impl ATP {
         let res: reqwest::blocking::Response;
         match request {
             Ok(req) => res = req,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
-        
 
         match res.json::<ResolveHandleRes>() {
             Ok(json) => Ok(json.did),
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
-        // Ok(res_json.did)
     }
-
-
 }
