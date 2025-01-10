@@ -1,6 +1,6 @@
 use atproto_rs::ATP;
-use eframe::egui;
 use derive_getters::Getters;
+use eframe::egui;
 
 #[derive(Default, Getters)]
 struct BlueskyClient {
@@ -14,11 +14,15 @@ struct BlueskyClient {
 
 fn main() {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(320.0,240.0)),
+        viewport: egui::ViewportBuilder::default(),
         ..Default::default()
     };
 
-    let _ = eframe::run_native("Bluesky Native", options, Box::new(|cc| Box::new(BlueskyClient::new(cc))));
+    let _ = eframe::run_native(
+        "Bluesky Native",
+        options,
+        Box::new(|cc| Ok(Box::new(BlueskyClient::new(cc)))),
+    );
 }
 
 impl BlueskyClient {
@@ -41,7 +45,7 @@ impl eframe::App for BlueskyClient {
                 ui.text_edit_singleline(&mut self.identity)
                     .labelled_by(identity_label.id);
             });
-            
+
             ui.horizontal(|ui| {
                 let password_label = ui.label("Password: ");
                 ui.text_edit_singleline(&mut self.password)
@@ -59,7 +63,7 @@ impl eframe::App for BlueskyClient {
                     match self.atproto.post(did, jwt, self.post_text().to_owned()) {
                         Ok(_) => {
                             println!("Post made");
-                        },
+                        }
                         Err(e) => {
                             println!("Error making post: {}", e);
                         }
@@ -69,23 +73,26 @@ impl eframe::App for BlueskyClient {
                 if ui.button("Login").clicked() {
                     let mut provider: String;
                     if !self.provider.starts_with("https://") {
-                        provider = "".to_owned()+"https://"+&self.provider;
+                        provider = "".to_owned() + "https://" + &self.provider;
                     } else {
-                        provider = "".to_owned()+&self.provider;
+                        provider = "".to_owned() + &self.provider;
                     }
                     if !self.provider.ends_with("/") {
-                        provider = "".to_owned()+&provider +"/";
+                        provider = "".to_owned() + &provider + "/";
                     } else {
-                        provider = "".to_owned()+&provider;
+                        provider = "".to_owned() + &provider;
                     }
                     self.atproto = ATP::new(&provider);
-                    match self.atproto.login(&self.identity, self.password.to_string()) {
+                    match self
+                        .atproto
+                        .login(&self.identity, self.password.to_string())
+                    {
                         Ok(_) => {
                             println!("logged in");
                             ui.label(format!("Logged in as {}", self.identity));
                             self.logged_in = true;
-                        },
-                        Err(_) => println!("Not Logged in")
+                        }
+                        Err(_) => println!("Not Logged in"),
                     }
                 }
             }
