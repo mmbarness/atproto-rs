@@ -1,11 +1,11 @@
-use serde::{Serialize,Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResolveHandle {
-    pub handle: String
+    pub handle: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResolveHandleRes {
-    pub did: String
+    pub did: String,
 }
