@@ -83,10 +83,7 @@ impl eframe::App for BskyGui {
                         provider = "".to_owned() + &provider;
                     }
                     self.client = Client::new(&provider);
-                    match self
-                        .client
-                        .login(&self.identity, self.password.to_string())
-                    {
+                    match self.client.login(&self.identity, self.password.to_string()) {
                         Ok(_) => {
                             println!("logged in");
                             ui.label(format!("Logged in as {}", self.identity));

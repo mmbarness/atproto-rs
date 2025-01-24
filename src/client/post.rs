@@ -1,4 +1,5 @@
 use super::endpoints::Endpoints;
+use super::auth::Auth;
 use super::Client;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -16,8 +17,11 @@ impl Client {
             },
         };
 
-        let response =
-            self.submit_post_request(Endpoints::CreateRecord, Some(Box::new(body)), Some(jwt))?;
+        let response = self.submit_post_request(
+            Endpoints::CreateRecord,
+            Some(Box::new(body)),
+            Some(Auth::JWT(jwt)),
+        )?;
 
         match response.json::<PostRes>() {
             Ok(json) => Ok(json),

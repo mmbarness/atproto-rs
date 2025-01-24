@@ -1,5 +1,5 @@
-use super::endpoints::Endpoints;
 use super::Client;
+use super::{endpoints::Endpoints, auth::{Auth, BasicAuth}};
 use serde::{Deserialize, Serialize};
 
 impl Client {
@@ -12,12 +12,15 @@ impl Client {
         let body = InviteCode {
             useCount: use_count,
         };
-        let response = reqwest::blocking::Client::new()
-            .post(self.url(Endpoints::CreateInviteCode))
-            .header("Content-Type", "application/json")
-            .json(&body)
-            .basic_auth(admin_username, Some(admin_password))
-            .send()?;
+
+        let response = self.submit_post_request(
+            Endpoints::CreateInviteCode,
+            Some(Box::new(body)),
+            Some(Auth::BasicAuth(BasicAuth::new(
+                &admin_username,
+                &admin_password,
+            ))),
+        )?;
 
         response.json::<InviteCodeRes>()
     }

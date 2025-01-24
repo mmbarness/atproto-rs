@@ -1,4 +1,5 @@
 use super::endpoints::Endpoints;
+use super::auth::Auth;
 use super::Client;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +8,7 @@ impl Client {
         let response = self.submit_post_request::<Empty>(
             Endpoints::RefreshSession,
             None,
-            Some(self.jwt.clone()),
+            Some(Auth::JWT(self.jwt.clone())),
         )?;
 
         let res_json = match response.json::<RefreshSessionRes>() {

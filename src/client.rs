@@ -1,8 +1,10 @@
 use derive_getters::Getters;
 mod at_request;
+mod auth;
 mod create_account;
 mod create_app_password;
 mod endpoints;
+mod errors;
 mod invite_code;
 mod login;
 mod post;
