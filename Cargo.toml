@@ -1,17 +1,18 @@
 [package]
-name = "atproto-rs"
+name = "bsky-rs"
 version = "0.1.1"
 edition = "2021"
 
 [lib]
-name = "atproto_rs"
+name = "bsky_rs"
 path = "src/lib.rs"
 
 [[bin]]
-name = "atproto-rs-example"
+name = "bsky-rs-example"
 path = "src/bin.rs"
 
 [dependencies]
+anyhow = "1.0.95"
 chrono = "0.4.31"
 derive-getters = "0.3.0"
 eframe = "0.30.0"

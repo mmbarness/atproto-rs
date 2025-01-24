@@ -1,10 +1,10 @@
-use atproto_rs::ATP;
+use bsky_rs::Client;
 use derive_getters::Getters;
 use eframe::egui;
 
 #[derive(Default, Getters)]
-struct BlueskyClient {
-    atproto: ATP,
+struct BskyGui {
+    client: Client,
     identity: String,
     provider: String,
     password: String,
@@ -21,16 +21,16 @@ fn main() {
     let _ = eframe::run_native(
         "Bluesky Native",
         options,
-        Box::new(|cc| Ok(Box::new(BlueskyClient::new(cc)))),
+        Box::new(|cc| Ok(Box::new(BskyGui::new(cc)))),
     );
 }
 
-impl BlueskyClient {
+impl BskyGui {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self::default()
     }
 }
-impl eframe::App for BlueskyClient {
+impl eframe::App for BskyGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Login");
@@ -58,9 +58,9 @@ impl eframe::App for BlueskyClient {
                         .labelled_by(post_text_label.id);
                 });
                 if ui.button("Post").clicked() {
-                    let jwt: String = self.atproto.jwt().to_owned();
-                    let did: String = self.atproto.did().to_owned();
-                    match self.atproto.post(did, jwt, self.post_text().to_owned()) {
+                    let jwt: String = self.client.jwt().to_owned();
+                    let did: String = self.client.did().to_owned();
+                    match self.client.post(did, jwt, self.post_text().to_owned()) {
                         Ok(_) => {
                             println!("Post made");
                         }
@@ -82,9 +82,9 @@ impl eframe::App for BlueskyClient {
                     } else {
                         provider = "".to_owned() + &provider;
                     }
-                    self.atproto = ATP::new(&provider);
+                    self.client = Client::new(&provider);
                     match self
-                        .atproto
+                        .client
                         .login(&self.identity, self.password.to_string())
                     {
                         Ok(_) => {
